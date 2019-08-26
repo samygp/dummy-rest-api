@@ -1,0 +1,9 @@
+version: "3.3"
+
+services:
+  file-monitor:
+    image: dummy-rest-api:latest
+    env_file:
+      - config.env
+    ports:
+      - "54345:54345"
