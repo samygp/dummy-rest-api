@@ -1,13 +1,11 @@
 PREFIX?=$(shell pwd)
-NAME := "dummy_rest_api"
-PKG := bitbucket.org/volteo/$(NAME)
+NAME := "dummy-rest-api"
+PKG := github.com/samygp/$(NAME)
 BUILDDIR := ${PREFIX}/dist
 ENTRYPOINT := cmd/main.go
 CTIMEVAR=-X $(PKG)/version.Name=$(NAME) -X $(PKG)/version.Version=$(VERSION)
 GO_LDFLAGS=-ldflags "$(CTIMEVAR)"
 GO_LDFLAGS_STATIC=-ldflags "-w $(CTIMEVAR) -extldflags -static"
-SEMBUMP_IMG=chatu/sembump:0.1.0
-SEMBUMP=docker run --rm -v `pwd`:/app $(SEMBUMP_IMG)
 
 .PHONY: default
 default: help
@@ -20,19 +18,20 @@ name: ## Output name of project
 version: ## Output current version
 	@echo $(VERSION)
 
-.PHONY: install-deps
-install-deps: ## Install dependencies
-	@echo "+ $@"
-	@go get -u golang.org/x/lint/golint
-	@go get -u github.com/kisielk/errcheck
-	@go get -u honnef.co/go/tools/cmd/staticcheck
-	@go get -u github.com/aws/aws-lambda-go/cmd/build-lambda-zip
-
 .PHONY: local-build
 local-build: ## Builds a dynamic executable or package
 	@echo "+ $@"
 	@go build \
 	  ${GO_LDFLAGS} -o $(NAME) \
+	  $(ENTRYPOINT)
+
+.PROXY: static
+static: ## Generate static binary
+	@echo "+ $@"
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build \
+	  -o $(NAME) \
+	  -a -tags "static_build netgo" \
+	  -installsuffix netgo ${GO_LDFLAGS_STATIC} \
 	  $(ENTRYPOINT)
 
 .PROXY: run

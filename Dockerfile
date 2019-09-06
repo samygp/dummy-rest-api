@@ -1,8 +1,21 @@
-FROM alpine
+FROM golang:1.12.9-alpine3.10
 
-RUN apk add ca-certificates
+LABEL maintainer="Sam <soysamygp@gmail.com>"
 
-ADD dummy-rest-api /usr/local/bin/
-EXPOSE 32123
+RUN set -x \
+  && apk add --update --no-cache \
+    git \
+    make \
+    ca-certificates \
+  && echo "Installed OS deps."
 
-ENTRYPOINT ["/usr/local/bin/dummy-rest-api"]
+WORKDIR /go/src/github.com/samygp/
+COPY Makefile ./
+ENV GO111MODULE on
+RUN go mod init
+
+COPY . .
+RUN make local-build
+EXPOSE 54345
+
+CMD ["./dummy-rest-api"]

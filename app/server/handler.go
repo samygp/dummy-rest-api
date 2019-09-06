@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/samygp/dummy-rest-api/config"
 	log "github.com/sirupsen/logrus"
@@ -58,8 +59,10 @@ func (h *Handler) handleGET(ctx context.Context, writer http.ResponseWriter, req
 // handlePOST receives a POST request and returns OK 200
 func (h *Handler) handlePOST(ctx context.Context, writer http.ResponseWriter, request *http.Request) error {
 	h.updateGuard("handlePOST")
+	defer request.Body.Close()
 	defer h.clearAndRecover(ctx, writer, "handlePOST")
-	Respond(ctx, writer, "OK", http.StatusOK)
+	time.Sleep(time.Duration(1000) * time.Millisecond)
+	Respond(ctx, writer, "OK Post", http.StatusOK)
 	return nil
 }
 

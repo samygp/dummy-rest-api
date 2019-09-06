@@ -52,6 +52,7 @@ func Respond(ctx context.Context, writer http.ResponseWriter, data interface{}, 
 	}
 
 	writer.Header().Set("Content-Type", "application/json")
+	writer.Header().Set("Connection", "close")
 	writer.WriteHeader(code)
 
 	jsonData, err := json.MarshalIndent(data, "", "  ")
