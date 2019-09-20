@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -61,8 +62,16 @@ func (h *Handler) handlePOST(ctx context.Context, writer http.ResponseWriter, re
 	h.updateGuard("handlePOST")
 	defer request.Body.Close()
 	defer h.clearAndRecover(ctx, writer, "handlePOST")
+	body, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		log.Errorf("Error reading body: %v", err)
+		RespondError(ctx, writer, err, http.StatusBadRequest)
+	} else {
+		log.Debugf("BODY: %s", string(body))
+		Respond(ctx, writer, "OK Post", http.StatusOK)
+	}
 	time.Sleep(time.Duration(1000) * time.Millisecond)
-	Respond(ctx, writer, "OK Post", http.StatusOK)
+
 	return nil
 }
 
